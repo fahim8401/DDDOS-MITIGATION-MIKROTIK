@@ -3,7 +3,8 @@ librouteros==3.2.1
 PyYAML==6.0.1
 Flask==3.0.0
 Flask-CORS==4.0.0
-Werkzeug==3.0.1
+Werkzeug==3.0.3
+SQLAlchemy==2.0.23
 
 # Optional dependencies for notifications
 requests==2.31.0
