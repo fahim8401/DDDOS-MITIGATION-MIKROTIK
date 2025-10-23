@@ -8,6 +8,13 @@ A comprehensive Python-based application for real-time DDoS attack monitoring an
 
 ## 🎯 Features
 
+### Multi-Router Support ⭐ NEW
+- **Centralized Management**: Monitor multiple MikroTik routers from a single dashboard
+- **Independent Monitoring**: Each router monitored in parallel with dedicated threads
+- **Unified Database**: Centralized SQLite database with SQLAlchemy ORM
+- **Per-Router Configuration**: Individual settings and credentials for each router
+- **Router Management API**: Full CRUD operations for router configurations
+
 ### Real-time Monitoring
 - **Continuous Traffic Analysis**: Monitor network traffic patterns in real-time
 - **Multiple Attack Detection**: Identify SYN floods, UDP floods, ICMP floods, and connection flooding
@@ -25,31 +32,36 @@ A comprehensive Python-based application for real-time DDoS attack monitoring an
 - **Event History**: Browse detailed attack logs with filtering
 - **IP Management**: Manually block/unblock IP addresses
 - **Router Status**: Monitor router connection and resource usage
+- **Multi-Router View**: See events and statistics across all routers
 
 ### RESTful API
 - **Complete API Coverage**: Manage all features programmatically
 - **API Key Authentication**: Secure access to monitoring endpoints
 - **JSON Responses**: Easy integration with other tools
 - **Health Checks**: Monitor application status
+- **Router Management**: Create, update, delete, and test router connections
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────┐      ┌──────────────────┐      ┌─────────────────┐
 │   Web Frontend  │ ───> │   Flask API      │ ───> │  MikroTik       │
-│   (React)       │      │   (Backend)      │      │  Router         │
+│   (React)       │      │   (SQLAlchemy)   │      │  Router 1       │
 └─────────────────┘      └──────────────────┘      └─────────────────┘
-                                 │
-                                 ▼
-                         ┌──────────────────┐
-                         │  SQLite Database │
-                         │  (Event Logs)    │
+                                 │                  ┌─────────────────┐
+                                 ├────────────────> │  MikroTik       │
+                                 │                  │  Router 2       │
+                                 │                  └─────────────────┘
+                                 ▼                  ┌─────────────────┐
+                         ┌──────────────────┐      │  MikroTik       │
+                         │  SQLite Database │<──── │  Router N       │
+                         │  (Centralized)   │      └─────────────────┘
                          └──────────────────┘
                                  ▲
                                  │
                          ┌──────────────────┐
-                         │  Monitor Service │
-                         │  (Detection)     │
+                         │  Monitor Manager │
+                         │  (Multi-Router)  │
                          └──────────────────┘
 ```
 
@@ -61,6 +73,8 @@ A comprehensive Python-based application for real-time DDoS attack monitoring an
 - **Node.js**: 18+ (for frontend development)
 
 ## 🚀 Quick Start
+
+> **Note**: This system now supports multiple routers! See [docs/MULTI_ROUTER_SETUP.md](docs/MULTI_ROUTER_SETUP.md) for complete multi-router setup guide.
 
 ### 1. Clone the Repository
 
@@ -97,10 +111,13 @@ mikrotik:
   port: 8728
 ```
 
-### 4. Install Dependencies
+### 4. Install Dependencies and Initialize Database
 
 ```bash
 pip install -r requirements.txt
+
+# Initialize the multi-router database
+python3 scripts/migrate_db.py --orm --add-sample
 ```
 
 ### 5. Run the Application
@@ -108,8 +125,8 @@ pip install -r requirements.txt
 #### Option A: Manual Start
 
 ```bash
-# Start the monitor
-python mt_ddos_monitor.py
+# Start the multi-router monitor
+python mt_ddos_manager.py
 
 # In another terminal, start the API
 python api/app.py
@@ -316,8 +333,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🗺️ Roadmap
 
+- [x] Support for multiple routers ✅ **NEW**
 - [ ] Machine learning-based anomaly detection
-- [ ] Support for multiple routers
 - [ ] Grafana dashboard integration
 - [ ] Advanced threat intelligence integration
 - [ ] Mobile app for monitoring

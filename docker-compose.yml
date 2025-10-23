@@ -38,12 +38,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        - REACT_APP_API_URL=/api
+        - REACT_APP_API_KEY=${API_KEY:-changeme}
     container_name: mt-ddos-frontend
     restart: unless-stopped
     ports:
       - "3000:80"
-    environment:
-      - REACT_APP_API_URL=http://localhost:5000/api
     depends_on:
       - backend
     networks:
@@ -60,14 +61,14 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Monitor Service (runs the main monitoring loop)
+  # Monitor Service (runs the multi-router monitoring)
   monitor:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: mt-ddos-monitor
     restart: unless-stopped
-    command: ["python", "mt_ddos_monitor.py"]
+    command: ["python", "mt_ddos_manager.py"]
     environment:
       - CONFIG_FILE=/app/config.yml
     volumes:
