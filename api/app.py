@@ -52,11 +52,13 @@ def require_api_key(f):
 def health_check():
     """Health check endpoint"""
     try:
+        from sqlalchemy import text
+        
         # Check database connection
         session = db_manager.get_session()
         db_status = False
         try:
-            session.execute('SELECT 1')
+            session.execute(text('SELECT 1'))
             db_status = True
         finally:
             session.close()
