@@ -1,0 +1,16 @@
+# Core dependencies
+librouteros==3.2.1
+PyYAML==6.0.1
+Flask==3.0.0
+Flask-CORS==4.0.0
+Werkzeug==3.0.1
+
+# Optional dependencies for notifications
+requests==2.31.0
+
+# Development dependencies (optional)
+pytest==7.4.3
+pytest-cov==4.1.0
+black==23.12.1
+flake8==6.1.0
+mypy==1.7.1
