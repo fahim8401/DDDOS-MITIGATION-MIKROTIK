@@ -65,9 +65,10 @@ def health_check():
             'timestamp': datetime.now().isoformat()
         }), 200
     except Exception as e:
+        logging.error(f"Health check error: {e}")
         return jsonify({
             'status': 'unhealthy',
-            'error': str(e),
+            'error': 'Service unavailable',
             'timestamp': datetime.now().isoformat()
         }), 500
 
@@ -97,7 +98,7 @@ def get_status():
         }), 200
     except Exception as e:
         logging.error(f"Error getting status: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve status'}), 500
 
 
 @app.route('/api/events', methods=['GET'])
@@ -141,7 +142,7 @@ def get_events():
         }), 200
     except Exception as e:
         logging.error(f"Error getting events: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve events'}), 500
 
 
 @app.route('/api/events/stats', methods=['GET'])
@@ -169,7 +170,7 @@ def get_event_stats():
         return jsonify(stats), 200
     except Exception as e:
         logging.error(f"Error getting event stats: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve event statistics'}), 500
 
 
 @app.route('/api/blocked-ips', methods=['GET'])
@@ -190,7 +191,7 @@ def get_blocked_ips():
         }), 200
     except Exception as e:
         logging.error(f"Error getting blocked IPs: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve blocked IPs'}), 500
 
 
 @app.route('/api/blocked-ips', methods=['POST'])
@@ -223,7 +224,7 @@ def block_ip():
             
     except Exception as e:
         logging.error(f"Error blocking IP: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to block IP address'}), 500
 
 
 @app.route('/api/blocked-ips/<ip_address>', methods=['DELETE'])
@@ -248,7 +249,7 @@ def unblock_ip(ip_address):
             
     except Exception as e:
         logging.error(f"Error unblocking IP: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to unblock IP address'}), 500
 
 
 @app.route('/api/config', methods=['GET'])
@@ -267,7 +268,7 @@ def get_config():
         return jsonify(safe_config), 200
     except Exception as e:
         logging.error(f"Error getting config: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve configuration'}), 500
 
 
 @app.route('/api/router/info', methods=['GET'])
@@ -296,7 +297,7 @@ def get_router_info():
         }), 200
     except Exception as e:
         logging.error(f"Error getting router info: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve router information'}), 500
 
 
 @app.route('/api/dashboard/summary', methods=['GET'])
@@ -338,7 +339,7 @@ def get_dashboard_summary():
         }), 200
     except Exception as e:
         logging.error(f"Error getting dashboard summary: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to retrieve dashboard summary'}), 500
 
 
 @app.errorhandler(404)
