@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mt-ddos-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - CONFIG_FILE=/app/config.yml
+      - API_HOST=0.0.0.0
+      - API_PORT=5000
+      - API_KEY=${API_KEY:-changeme}
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - ddos-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend Web Interface
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: mt-ddos-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+    depends_on:
+      - backend
+    networks:
+      - ddos-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Monitor Service (runs the main monitoring loop)
+  monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mt-ddos-monitor
+    restart: unless-stopped
+    command: ["python", "mt_ddos_monitor.py"]
+    environment:
+      - CONFIG_FILE=/app/config.yml
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - backend
+    networks:
+      - ddos-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  ddos-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  data:
+  logs:

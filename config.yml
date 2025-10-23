@@ -1,0 +1,118 @@
+# MikroTik DDoS Monitor Configuration
+# All settings can be overridden via environment variables
+
+# MikroTik Router Connection Settings
+mikrotik:
+  host: "192.168.88.1"           # Router IP address or hostname
+  username: "admin"              # RouterOS username
+  password: "changeme"           # RouterOS password (use environment variable in production)
+  port: 8728                     # API port (8728 for standard, 8729 for SSL)
+  use_ssl: false                 # Enable SSL/TLS connection
+
+# DDoS Detection Settings
+detection:
+  # Monitoring interval in seconds
+  check_interval: 30
+  
+  # Packet rate threshold (packets per second)
+  packet_threshold: 10000
+  
+  # Connection rate threshold (connections per minute)
+  connection_threshold: 1000
+  
+  # Auto-block suspicious IPs
+  auto_block_enabled: true
+  
+  # Block duration (RouterOS time format: 1h, 30m, 1d, etc.)
+  block_duration: "1h"
+  
+  # Address list name for blocked IPs
+  address_list_name: "ddos_blocklist"
+  
+  # Whitelist of IPs that should never be blocked
+  whitelist:
+    - "192.168.88.0/24"          # Local network
+    - "10.0.0.0/8"               # Private network
+  
+  # Detection algorithms
+  algorithms:
+    syn_flood: true              # Detect SYN flood attacks
+    udp_flood: true              # Detect UDP flood attacks
+    icmp_flood: true             # Detect ICMP/ping flood attacks
+    http_flood: true             # Detect HTTP flood attacks
+    connection_flood: true       # Detect connection flooding
+
+# Database Settings
+database:
+  path: "ddos_events.db"         # SQLite database file path
+  retention_days: 30             # Keep events for this many days
+  auto_cleanup: true             # Automatically remove old events
+
+# API Settings
+api:
+  enabled: true                  # Enable REST API
+  host: "0.0.0.0"               # API bind address
+  port: 5000                     # API port
+  key: "changeme"                # API authentication key (use environment variable in production)
+  cors_enabled: true             # Enable CORS for web frontend
+  rate_limit: 100                # Requests per minute per IP
+
+# Notification Settings
+notifications:
+  enabled: true
+  
+  # Email notifications
+  email:
+    enabled: false
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    smtp_user: "your-email@gmail.com"
+    smtp_password: "your-password"
+    from_address: "ddos-monitor@example.com"
+    to_addresses:
+      - "admin@example.com"
+    # Send email for these severity levels
+    severity_threshold: "HIGH"   # LOW, MEDIUM, HIGH, CRITICAL
+  
+  # Webhook notifications
+  webhook:
+    enabled: false
+    url: "https://hooks.example.com/webhook"
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+    severity_threshold: "HIGH"
+  
+  # Telegram notifications
+  telegram:
+    enabled: false
+    bot_token: "your-bot-token"
+    chat_id: "your-chat-id"
+    severity_threshold: "HIGH"
+
+# Logging Settings
+logging:
+  level: "INFO"                  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "mt_ddos_monitor.log"   # Log file path
+  max_size_mb: 100               # Maximum log file size
+  backup_count: 5                # Number of backup log files to keep
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Advanced Settings
+advanced:
+  # Maximum concurrent connections to monitor
+  max_connections: 100000
+  
+  # Memory limit for event buffer (MB)
+  event_buffer_mb: 50
+  
+  # Enable performance profiling
+  profiling_enabled: false
+  
+  # RouterOS API timeout (seconds)
+  api_timeout: 10
+  
+  # Retry connection on failure
+  retry_on_failure: true
+  retry_interval: 60             # Seconds between retries
+  max_retries: 5                 # Maximum number of retries (-1 for infinite)
