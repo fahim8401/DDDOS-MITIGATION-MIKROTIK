@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models import get_database, Router, Event, BlockedIP, RouterStats, DatabaseManager
-from mt_ddos_manager import RouterClient, MonitorWorker, ConfigManager
+from mt_ddos_manager import RouterClient, Monitor, Config
 import models
 
 
@@ -31,7 +31,7 @@ class TestRouterModel:
             session = db.get_session()
             
             router = Router(
-                name='Test Router',
+                name='Test Router 1',
                 host='192.168.1.1',
                 port=8728,
                 username='admin',
@@ -44,7 +44,7 @@ class TestRouterModel:
             session.commit()
             
             # Verify router was created
-            saved_router = session.query(Router).filter_by(name='Test Router').first()
+            saved_router = session.query(Router).filter_by(name='Test Router 1').first()
             assert saved_router is not None
             assert saved_router.host == '192.168.1.1'
             assert saved_router.port == 8728
@@ -95,7 +95,7 @@ class TestEventModel:
             
             # Create router first
             router = Router(
-                name='Test Router',
+                name='Test Router 2',
                 host='192.168.1.1',
                 username='admin',
                 password='test',
@@ -149,7 +149,7 @@ class TestBlockedIPModel:
             
             # Create router first
             router = Router(
-                name='Test Router',
+                name='Test Router 3',
                 host='192.168.1.1',
                 username='admin',
                 password='test',
@@ -198,12 +198,17 @@ class TestRouterClient:
             enabled=True
         )
         
-        client = RouterClient(router)
+        client = RouterClient(
+            host=router.host,
+            username=router.username,
+            password=router.password,
+            port=router.port,
+            use_ssl=router.use_ssl
+        )
         
-        assert client.router == router
-        assert client.api is None
-        assert client.connected is False
-        assert client.last_error is None
+        assert client.host == router.host
+        assert client.username == router.username
+        assert client.password == router.password
 
 
 class TestConfigManager:
@@ -222,7 +227,7 @@ database:
   path: test.db
 """)
         
-        config = ConfigManager(str(config_file))
+        config = Config(str(config_file))
         
         assert config.get('detection.check_interval') == 30
         assert config.get('detection.packet_threshold') == 10000
@@ -244,7 +249,7 @@ def test_database_relationships():
         
         # Create router
         router = Router(
-            name='Test Router',
+            name='Test Router 4',
             host='192.168.1.1',
             username='admin',
             password='test',

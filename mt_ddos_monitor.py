@@ -216,6 +216,11 @@ class MikroTikMonitor:
         """Analyze traffic patterns for potential DDoS attacks"""
         events = []
         
+        # Skip analysis if no router connection (demo mode)
+        if not self.api:
+            logging.debug("No router connection - skipping traffic analysis")
+            return events
+        
         try:
             # Get firewall filter rules statistics
             firewall = self.api.path('/ip/firewall/filter')
@@ -336,11 +341,16 @@ class MikroTikMonitor:
         auto_block = self.config.get('detection.auto_block_enabled', True)
         
         logging.info("Starting monitoring loop")
+        logging.info(f"Check interval: {check_interval} seconds")
+        logging.info(f"Auto-block enabled: {auto_block}")
+        logging.info(f"Router connection available: {self.api is not None}")
         
         while self.running:
             try:
+                logging.debug("Analyzing traffic...")
                 # Analyze traffic for DDoS attacks
                 events = self.analyze_traffic()
+                logging.debug(f"Found {len(events)} potential DDoS events")
                 
                 for event in events:
                     # Log event to database
@@ -351,8 +361,9 @@ class MikroTikMonitor:
                         if self.block_ip(event.source_ip, event.attack_type):
                             event.action_taken = "Blocked"
                             self.db.log_event(event)
-                    
+                
                 # Sleep until next check
+                logging.debug(f"Sleeping for {check_interval} seconds")
                 time.sleep(check_interval)
                 
             except KeyboardInterrupt:
@@ -367,10 +378,18 @@ class MikroTikMonitor:
     
     def start(self):
         """Start the monitor"""
-        if self.connect_to_router():
-            self.monitor_loop()
-        else:
-            logging.error("Failed to start monitor - connection failed")
+        try:
+            if self.connect_to_router():
+                logging.info("Router connected successfully, starting monitoring")
+                self.monitor_loop()
+            else:
+                logging.warning("Failed to connect to router - running in demo mode")
+                # Run monitoring loop even without router connection for demo purposes
+                logging.info("Starting monitor loop in demo mode")
+                self.monitor_loop()
+        except Exception as e:
+            logging.error(f"Error in start method: {e}")
+            raise
     
     def stop(self):
         """Stop the monitor"""

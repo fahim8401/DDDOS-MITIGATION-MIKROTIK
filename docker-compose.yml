@@ -5,7 +5,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.backend
     container_name: mt-ddos-backend
     restart: unless-stopped
     ports:
@@ -68,7 +68,7 @@ services:
       dockerfile: Dockerfile
     container_name: mt-ddos-monitor
     restart: unless-stopped
-    command: ["python", "mt_ddos_manager.py"]
+    command: ["python", "mt_ddos_monitor.py"]
     environment:
       - CONFIG_FILE=/app/config.yml
     volumes:
@@ -90,7 +90,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.22.0.0/16
 
 volumes:
   data:

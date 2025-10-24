@@ -16,14 +16,14 @@ from typing import Dict, List
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from mt_ddos_manager import ConfigManager, RouterClient
+from mt_ddos_manager import Config, RouterClient
 from models import get_database, Router, Event, BlockedIP, RouterStats, Setting
 
 app = Flask(__name__)
 CORS(app)
 
 # Initialize components
-config = ConfigManager(os.getenv('CONFIG_FILE', 'config.yml'))
+config = Config(os.getenv('CONFIG_FILE', 'config.yml'))
 db_path = config.get('database.path', 'ddos_events.db')
 db_manager = get_database(f'sqlite:///{db_path}')
 

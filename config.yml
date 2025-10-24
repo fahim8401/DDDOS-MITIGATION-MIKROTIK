@@ -1,52 +1,62 @@
-# MikroTik DDoS Monitor Configuration
+# MikroTik Multi-Router DDoS Monitor Configuration
 # All settings can be overridden via environment variables
-
-# MikroTik Router Connection Settings
-mikrotik:
-  host: "192.168.88.1"           # Router IP address or hostname
-  username: "admin"              # RouterOS username
-  password: "changeme"           # RouterOS password (use environment variable in production)
-  port: 8728                     # API port (8728 for standard, 8729 for SSL)
-  use_ssl: false                 # Enable SSL/TLS connection
-
-# DDoS Detection Settings
-detection:
-  # Monitoring interval in seconds
-  check_interval: 30
-  
-  # Packet rate threshold (packets per second)
-  packet_threshold: 10000
-  
-  # Connection rate threshold (connections per minute)
-  connection_threshold: 1000
-  
-  # Auto-block suspicious IPs
-  auto_block_enabled: true
-  
-  # Block duration (RouterOS time format: 1h, 30m, 1d, etc.)
-  block_duration: "1h"
-  
-  # Address list name for blocked IPs
-  address_list_name: "ddos_blocklist"
-  
-  # Whitelist of IPs that should never be blocked
-  whitelist:
-    - "192.168.88.0/24"          # Local network
-    - "10.0.0.0/8"               # Private network
-  
-  # Detection algorithms
-  algorithms:
-    syn_flood: true              # Detect SYN flood attacks
-    udp_flood: true              # Detect UDP flood attacks
-    icmp_flood: true             # Detect ICMP/ping flood attacks
-    http_flood: true             # Detect HTTP flood attacks
-    connection_flood: true       # Detect connection flooding
 
 # Database Settings
 database:
-  path: "ddos_events.db"         # SQLite database file path
-  retention_days: 30             # Keep events for this many days
-  auto_cleanup: true             # Automatically remove old events
+  path: "mt_ddos.db"             # SQLite database file path
+  retention_days: 30             # Keep events/metrics for this many days
+
+# MikroTik Router Configuration
+mikrotik:
+  host: "103.7.4.18"             # Router IP address
+  port: 8728                     # RouterOS API port
+  username: "ddos"               # RouterOS username
+  password: "monitor"            # RouterOS password
+
+# API Settings
+api:
+  host: "0.0.0.0"
+  port: 5000
+  key: "changeme"                # API key for authentication
+
+# Default Router Configuration (applied to new routers)
+router_defaults:
+  poll_interval: 30              # Monitoring interval in seconds
+  conn_attack_threshold: 10000   # Connection count threshold
+  new_conn_rate_threshold: 1000  # New connections per minute threshold
+  per_src_new_conn_limit: 100    # Per-source new connection limit
+  per_src_window: 60             # Sliding window in seconds
+  tighten_cooldown: 300          # Cooldown between tighten actions
+  tighten_limits: "{}"           # JSON string of tightened limits
+  restore_limits: "{}"           # JSON string of normal limits
+  notification_prefs: "{}"       # JSON string of notification preferences
+
+# Notification Settings
+notifications:
+  telegram:
+    enabled: false
+    token: ""
+    chat_id: ""
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    smtp_user: ""
+    smtp_password: ""
+    alert_email: ""
+  webhook:
+    enabled: false
+    url: ""
+
+# Logging
+logging:
+  level: "INFO"
+  file: "mt_ddos_manager.log"
+
+# Background Tasks
+tasks:
+  cleanup_interval: 86400        # Cleanup old data daily
+  backup_interval: 86400         # Backup database daily
 
 # API Settings
 api:
